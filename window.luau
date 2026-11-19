@@ -361,7 +361,13 @@ local function write(cx: WindowCx, saved: Saved, actions: { string })
 				tern.fs.write(path, text)
 				tern.fs.write(join(dir, "latest.json"), text)
 				rotate(dir)
-				tern.kv.set("last", { at = os.date("%d/%m %H:%M"), path = path })
+				tern.kv.set("last", {
+					at = os.date("%d/%m %H:%M"),
+					path = path,
+					sessions = counts.sessions,
+					tabs = counts.tabs,
+					blocks = counts.blocks,
+				})
 				tern.chrome.refresh()
 				local nsaved = #saved.files + #saved.other
 				local level: ToastLevel = if #saved.errors > 0 then "info" else "success"
@@ -547,19 +553,64 @@ tern.carly.export("restore", {
 	return true
 end)
 
+-- The widget: its text shows the last snapshot; its hover card shows what the
+-- last snapshot holds and one row of buttons: save, restore the last one,
+-- pick another. Card buttons take text only, so their icons are emoji.
+-- render runs in a 4 ms budget, so it reads only what the save put in kv.
 tern.chrome.widget("save", {
-	name = "Salva configurazione Tern",
-	description = "Un clic salva sessioni, schede, split e blocchi in uno snapshot JSON",
+	name = "Tern Snapshot",
+	description = "Salva e ripristina sessioni, schede, split e blocchi",
 	icon = "save",
 	render = function(_pane)
 		local last = tern.kv.get("last")
 		local at = if type(last) == "table" and type(last.at) == "string" then last.at else nil
+		local card: { WidgetCardRow } = {}
+		local buttons = { { id = "save", label = "💾 Salva" } }
+		if at then
+			table.insert(card, { label = "Ultimo", text = at, tone = "accent" })
+			if type(last.sessions) == "number" then
+				table.insert(card, {
+					label = "Contiene",
+					text = string.format("%d sessioni · %d schede", last.sessions, last.tabs),
+					tone = "muted",
+				})
+			end
+			table.insert(buttons, { id = "restore_last", label = "↩ Ripristina" })
+		else
+			table.insert(card, { label = "Ultimo", text = "nessuno", tone = "muted" })
+		end
+		table.insert(buttons, { id = "restore_pick", label = "📂 Scegli" })
+		table.insert(card, { id = "actions", text = "", actions = buttons })
 		return {
 			text = if at then "Snapshot " .. at else "Snapshot",
-			title = if at
-				then "Ultimo snapshot: " .. at .. "\n" .. tostring(last.path) .. "\nClic: salva adesso"
-				else "Clic: salva sessioni, schede e blocchi",
+			card = card,
 			command = "plugin.tern-snapshot.save",
 		}
 	end,
 })
+
+tern.on("widget_action", function(ev: WidgetActionEvent, cx: WindowCx)
+	if ev.widget ~= "save" then
+		return nil
+	end
+	local ok, err = pcall(function()
+		if ev.act == "save" then
+			run(cx)
+		elseif ev.act == "restore_last" then
+			local last = tern.kv.get("last")
+			local path = if type(last) == "table" and type(last.path) == "string" then last.path else nil
+			if path and tern.fs.exists(path) then
+				Restore.ask(cx, path)
+			else
+				Restore.run(cx, snapdir())
+			end
+		elseif ev.act == "restore_pick" then
+			Restore.run(cx, snapdir())
+		end
+	end)
+	if not ok then
+		busy = false
+		cx:toast("error", "Tern Snapshot", tostring(err))
+	end
+	return true
+end)

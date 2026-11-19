@@ -548,41 +548,44 @@ function M.run(cx: WindowCx, dir: string)
 	end
 	cx:pick({ items = items, placeholder = "Snapshot da ripristinare", icon = "save", action = "ripristina" })
 		:next(function(item, _e, cx2)
-			local cx = cx2 :: WindowCx
-			if not item then
-				return
+			if item then
+				M.ask(cx2 :: WindowCx, item.file :: string)
 			end
-			local path = item.file :: string
-			local doc, err = load(path)
-			if not doc then
-				cx:toast("error", "Snapshot non leggibile", (err or "") .. "\n" .. path)
-				return
-			end
-			local have = existing(cx)
-			local clash = {}
-			for _, s in doc.sessions do
-				if have[tostring(s.name)] then
-					table.insert(clash, tostring(s.name))
-				end
-			end
-			if #clash == 0 then
-				start(cx, doc, path, "skip")
-				return
-			end
-			cx:pick({
-				items = {
-					{ label = "Salta le sessioni che esistono già", detail = table.concat(clash, ", "), mode = "skip" },
-					{ label = "Creale con il suffisso" .. SUFFIX, detail = table.concat(clash, ", "), mode = "suffix" },
-				},
-				placeholder = string.format("%d sessioni esistono già: le esistenti non vengono toccate", #clash),
-				icon = "save",
-				action = "scegli",
-			}):next(function(choice, _e2, cx3)
-				if choice then
-					start(cx3 :: WindowCx, doc, path, choice.mode :: string)
-				end
-			end)
 		end)
+end
+
+-- Restores `path`; when some of its sessions already exist, asks first whether
+-- to skip them or create them with the suffix.
+function M.ask(cx: WindowCx, path: string)
+	local doc, err = load(path)
+	if not doc then
+		cx:toast("error", "Snapshot non leggibile", (err or "") .. "\n" .. path)
+		return
+	end
+	local have = existing(cx)
+	local clash = {}
+	for _, s in doc.sessions do
+		if have[tostring(s.name)] then
+			table.insert(clash, tostring(s.name))
+		end
+	end
+	if #clash == 0 then
+		start(cx, doc, path, "skip")
+		return
+	end
+	cx:pick({
+		items = {
+			{ label = "Salta le sessioni che esistono già", detail = table.concat(clash, ", "), mode = "skip" },
+			{ label = "Creale con il suffisso" .. SUFFIX, detail = table.concat(clash, ", "), mode = "suffix" },
+		},
+		placeholder = string.format("%d sessioni esistono già: le esistenti non vengono toccate", #clash),
+		icon = "save",
+		action = "scegli",
+	}):next(function(choice, _e2, cx3)
+		if choice then
+			start(cx3 :: WindowCx, doc, path, choice.mode :: string)
+		end
+	end)
 end
 
 -- For tests and scripted use: restores `path` with a fixed clash mode.

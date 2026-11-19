@@ -6,9 +6,11 @@ Tern le chiude, le ricostruisce.
 
 Plugin non ufficiale, non affiliato a Stencil.
 
-![Il widget Salva configurazione Tern](docs/widget.png)
+![Il widget Tern Snapshot](docs/widget.png)
 
-Il widget mostra quando hai salvato l'ultima volta. Un clic salva di nuovo.
+Il widget nella barra mostra quando hai salvato l'ultima volta. Passandoci sopra
+si apre la scheda con tre bottoni: **💾 Salva**, **↩ Ripristina** (l'ultimo
+snapshot) e **📂 Scegli** (uno snapshot precedente).
 
 ## Installazione
 
@@ -25,7 +27,7 @@ Poi aggiungi il widget alla barra, una volta sola:
 
 1. Apri la palette dei comandi con Ctrl+Shift+P.
 2. Scegli **Edit widgets…**.
-3. Aggiungi **Salva configurazione Tern** dove vuoi nella barra.
+3. Aggiungi **Tern Snapshot** dove vuoi nella barra.
 
 ## Aggiornamento
 
@@ -50,7 +52,8 @@ Gli snapshot in `%LOCALAPPDATA%\Tern\plugin-data\tern-snapshot\` restano sul dis
 
 ### Salvare la configurazione
 
-Clic sul widget **Snapshot**, oppure Ctrl+Shift+P → **Salva configurazione Tern**.
+Passa sopra il widget **Snapshot** e premi **💾 Salva** (oppure clic sul
+widget, o Ctrl+Shift+P → **Salva configurazione Tern**).
 
 Il plugin:
 
@@ -65,7 +68,9 @@ prima di aggiornare Tern.
 
 ### Ripristinare
 
-Ctrl+Shift+P → **Ripristina configurazione Tern**:
+Passa sopra il widget e premi **↩ Ripristina** per l'ultimo snapshot, oppure
+**📂 Scegli** per sceglierne uno dall'elenco (anche da Ctrl+Shift+P →
+**Ripristina configurazione Tern**):
 
 1. scegli lo snapshot dall'elenco: ogni voce mostra data, sessioni, schede e
    blocchi;
