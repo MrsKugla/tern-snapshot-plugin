@@ -1,0 +1,7 @@
+schema = 1
+id = "tern-snapshot"
+name = "Tern Snapshot"
+version = "0.1.0"
+description = "Salva in un JSON sessioni, schede, split e blocchi di Tern, per ricostruirli dopo una chiusura."
+icon = "archive"
+window = "window.luau"

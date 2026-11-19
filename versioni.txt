@@ -1,0 +1,3 @@
+0.1.0 - [19/11/2026]
+    - Primo rilascio: comando e widget "Salva configurazione Tern" che salvano i file modificati e scrivono uno snapshot JSON di tutte le sessioni della finestra, con schede, split, blocchi e conversazione omp di ogni agente, tenendo gli ultimi 30 (file: window.luau)
+    - Comando "Ripristina configurazione Tern": ricrea le sessioni mancanti di uno snapshot con schede, nomi, colori, ordine e split, riapre file, git, browser, board e notebook, rilancia gli agenti con omp --resume e alla fine apre un resoconto di cosa non è riuscito; le sessioni esistenti non vengono mai toccate (file: restore.luau)
